@@ -5,11 +5,13 @@
 	import TodoForm from "./TodoForm.svelte";
 
 	let todos: TodoType[] = [];
+	let loading = true;
 
 	onMount(async () => {
 		const response = await fetch('https://dummyjson.com/todos?limit=10');
 		const page: Page<"todos", TodoType> = await response.json();
 		todos = page.todos;
+		loading = false;
 	});
 
 	const handleSubmit = (e: CustomEvent<string>) => {
@@ -39,9 +41,15 @@
 <TodoForm on:submit={handleSubmit} />
 
 <ul>
-	{#each todos as todo}
-		<li>
-			<Todo {todo} on:delete={handleDelete} />
-		</li>
-	{/each}
+	{#if loading}
+		<li>Loading todos...</li>
+	{:else if todos.length === 0}
+		<li>No todos</li>
+	{:else}
+		{#each todos as todo}
+			<li>
+				<Todo {todo} on:delete={handleDelete} />
+			</li>
+		{/each}
+	{/if}
 </ul>
